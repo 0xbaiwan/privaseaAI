@@ -45,12 +45,45 @@ install_docker() {
 
     sudo apt update -y && sudo apt upgrade -y
     sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    
+    # 启动 Docker 服务
+    print_message "正在启动 Docker 服务..."
+    sudo systemctl start docker
+    sudo systemctl enable docker
+    
+    # 将当前用户添加到 docker 组
+    sudo usermod -aG docker $USER
+    
+    # 测试 Docker
+    if ! docker run hello-world; then
+        echo -e "${RED}Docker 测试失败。请尝试重新登录终端或重启系统后重试。${NC}"
+        echo -e "${YELLOW}您可以运行以下命令重新登录终端：${NC}"
+        echo -e "su - $USER"
+        exit 1
+    fi
+    
     check_status "Docker 安装"
 }
 
 # 设置 Privasea 节点
 setup_privasea_node() {
     print_message "\n正在设置 Privasea 节点..."
+    
+    # 检查 Docker 服务状态
+    if ! sudo systemctl is-active --quiet docker; then
+        print_message "Docker 服务未运行，正在启动..."
+        sudo systemctl start docker
+        sleep 3  # 等待服务启动
+    fi
+    
+    # 检查 Docker 权限
+    if ! docker ps &>/dev/null; then
+        echo -e "${RED}无法访问 Docker。请尝试以下操作：${NC}"
+        echo -e "${YELLOW}1. 运行: sudo usermod -aG docker $USER${NC}"
+        echo -e "${YELLOW}2. 重新登录终端: su - $USER${NC}"
+        echo -e "${YELLOW}3. 或重启系统${NC}"
+        exit 1
+    fi
     
     # 拉取 Docker 镜像
     print_message "正在拉取 Docker 镜像..."
