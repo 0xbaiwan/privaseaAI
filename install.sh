@@ -131,6 +131,45 @@ setup_privasea_node() {
     print_message "\n查看日志请运行: docker logs -f $container_id"
 }
 
+# 添加删除节点的函数
+remove_node() {
+    print_message "\n正在检查 Privasea 节点状态..."
+    
+    # 获取运行中的容器ID
+    container_id=$(docker ps -q --filter ancestor=privasea/acceleration-node-beta:latest)
+    
+    if [ -n "$container_id" ]; then
+        print_message "正在停止运行中的节点容器..."
+        docker stop $container_id
+        docker rm $container_id
+        check_status "停止容器"
+    fi
+    
+    # 检查是否有其他已停止的容器
+    stopped_containers=$(docker ps -a -q --filter ancestor=privasea/acceleration-node-beta:latest)
+    if [ -n "$stopped_containers" ]; then
+        print_message "正在删除已停止的节点容器..."
+        docker rm $stopped_containers
+        check_status "删除容器"
+    fi
+    
+    # 删除 Docker 镜像
+    if docker images | grep -q "privasea/acceleration-node-beta"; then
+        print_message "正在删除 Docker 镜像..."
+        docker rmi privasea/acceleration-node-beta
+        check_status "删除镜像"
+    fi
+    
+    # 删除配置文件
+    if [ -d "$HOME/privasea" ]; then
+        print_message "正在删除配置文件..."
+        rm -rf $HOME/privasea
+        check_status "删除配置文件"
+    fi
+    
+    print_message "\n节点已完全删除！"
+}
+
 # 主菜单
 show_menu() {
     clear
@@ -140,6 +179,7 @@ show_menu() {
     echo "3) 仅安装 Docker"
     echo "4) 仅设置 Privasea 节点"
     echo "5) 查看节点日志"
+    echo "6) 删除节点"
     echo "0) 退出"
     echo
     echo -n "请选择: "
@@ -170,6 +210,17 @@ while true; do
                 docker logs -f $container_id
             else
                 echo -e "${RED}未找到运行中的节点容器${NC}"
+            fi
+            ;;
+        6)
+            echo -e "${YELLOW}警告: 此操作将删除节点容器、镜像和所有配置文件。${NC}"
+            echo -e "${YELLOW}请确保您已备份重要数据。${NC}"
+            echo -n "确定要继续吗？(y/N): "
+            read confirm
+            if [[ $confirm == [Yy] ]]; then
+                remove_node
+            else
+                echo "已取消删除操作"
             fi
             ;;
         0)
