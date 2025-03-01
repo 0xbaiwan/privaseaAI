@@ -6,7 +6,7 @@
 * 总供应量的 1% 分配给 Privasea 节点贡献者。
 * 排行榜将在 30 天后结束。
 * 节点排行榜仅基于设备性能和节点正常运行时间；质押的代币不会影响排名。
-* 确保在运行节点后加入 [ImHuman 应用程序](https://github.com/0xbaiwan/privaseaAI/blob/main/README.md#8-join-imhuman-application-built-by-privasea)。
+* 确保在运行节点后加入 [ImHuman 应用程序](https://github.com/0xbaiwan/privaseaAI/blob/main/README.md#8加入Privasea构建的ImHuman应用程序)。
 
 ![image](https://github.com/user-attachments/assets/749bd88b-94bf-4cea-98b8-342a4e2124ab)
 
